@@ -157,4 +157,12 @@ class CoListTest extends TestCase
             $this->assertSame($testArr[$key], $value);
         }
     }
+    
+    public function testIsEmpty(): void
+    {
+        $this->assertFalse($this->coList->isEmpty());
+        
+        $list = new CoList([]);
+        $this->assertTrue($list->isEmpty());;
+    }
 }
