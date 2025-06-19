@@ -1,4 +1,4 @@
-FROM composer:2.7.1 AS composer-cache
+FROM composer:2.8.8 AS composer-cache
 WORKDIR /var/www/html
 
 # copy only composer files for caching
@@ -7,7 +7,7 @@ COPY composer.json composer.lock /var/www/html/
 # install deps(without generating autoloader)
 RUN composer install --no-scripts --no-autoloader --ignore-platform-reqs
 
-FROM php:8.3-bullseye
+FROM php:8.4-bullseye
 
 WORKDIR /code
 
