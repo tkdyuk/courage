@@ -4,19 +4,37 @@ declare(strict_types=1);
 
 namespace Courage;
 
+use ArrayAccess;
 use \ArrayIterator;
 use Courage\Exceptions\InvalidArgumentException;
+use IteratorAggregate;
+use ReturnTypeWillChange;
 use RuntimeException;
 
+/**
+ * @template T
+ * @implements IteratorAggregate<int|string, T>
+ * @implements ArrayAccess<int|string, T>
+ * @phpstan-consistent-constructor
+ */
 class CoList implements \ArrayAccess, \Countable, \IteratorAggregate
 {
+    /**
+     * @var T[] $value
+     */
     protected array $value;
 
+    /**
+     * @param T[] $value
+     */
     public function __construct(array $value)
     {
         $this->value = $value;
     }
 
+    /**
+     * @return T[]
+     */
     public function toArray(): array
     {
         return $this->value;
@@ -25,8 +43,9 @@ class CoList implements \ArrayAccess, \Countable, \IteratorAggregate
     /**
      * Applies the callback to the elements.
      *
-     * @param callable $callable
-     * @return self
+     * @template X
+     * @param callable(T): X $callable
+     * @return self<X>
      */
     public function map(callable $callable): self
     {
@@ -38,8 +57,8 @@ class CoList implements \ArrayAccess, \Countable, \IteratorAggregate
     }
 
     /**
-     * @param callable $closure
-     * @return $this
+     * @param callable(T): bool $closure
+     * @return static
      */
     public function filter(callable $closure): static
     {
@@ -53,7 +72,7 @@ class CoList implements \ArrayAccess, \Countable, \IteratorAggregate
     }
 
     /**
-     * @param callable $closure
+     * @param callable(T): bool $closure
      * @return bool
      */
     public function some(callable $closure): bool
@@ -64,8 +83,7 @@ class CoList implements \ArrayAccess, \Countable, \IteratorAggregate
     }
 
     /**
-     * @param array $add
-     * @return void
+     * @param T[] $add
      */
     public function merge(array $add): void
     {
@@ -82,8 +100,7 @@ class CoList implements \ArrayAccess, \Countable, \IteratorAggregate
 
     /**
      * Returns length of list.
-     *
-     * @return int
+     * @return int<0, max>
      */
     public function length(): int
     {
@@ -115,9 +132,10 @@ class CoList implements \ArrayAccess, \Countable, \IteratorAggregate
      * Retrieve for value of offset
      *
      * @param mixed $offset
-     * @return mixed
+     * @return T
      */
-    public function offsetGet($offset)
+    #[ReturnTypeWillChange]
+    public function offsetGet(mixed $offset)
     {
         if (!isset($this->value[$offset])) {
             throw new InvalidArgumentException('Does not exist offset was specified.');
@@ -160,5 +178,10 @@ class CoList implements \ArrayAccess, \Countable, \IteratorAggregate
     public function getIterator(): ArrayIterator
     {
         return new ArrayIterator($this->value);
+    }
+
+    public function isEmpty(): bool
+    {
+        return count($this->value) === 0;
     }
 }
